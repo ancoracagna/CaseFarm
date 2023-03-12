@@ -9,7 +9,7 @@ bot = telebot.TeleBot(API_KEY)
 def send_welcome(message):
     try:
         user = message.from_user.id
-        conn = sqlite3.connect('main.db')
+        conn = sqlite3.connect('DB/main.db')
         cursor = conn.cursor()
         cursor.execute("SELECT id FROM users WHERE telegram_id LIKE " + str(user))
         results = cursor.fetchall()
@@ -26,8 +26,8 @@ def send_welcome(message):
         if (len(results) > 0):
             print("User already in system")
             bot.reply_to(message,str(message.from_user.first_name)+', мы скучали! \nВозвращаем Вас в главное меню!')  # добавить выбор клавы по тарифу функцией getkeys() или подобной
-    except:
-        pass
+    except Exception as e:
+        print(e)
 
 if __name__ == '__main__':
     while True:
