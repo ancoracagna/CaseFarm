@@ -1,5 +1,5 @@
 import time
-from Modules import add_bot, get_list_bots, show_keys, add_casedrop
+from Modules import add_bot, get_list_bots, show_keys, add_casedrop, get_bot_cases, get_summary
 from Keyboard import initk
 from settings import API_KEY
 import telebot
@@ -12,6 +12,8 @@ def callback_worker(call):
     if 'Case' in call.data:
         case, bot_name = str(call.data).split('|')
         add_casedrop(bot_name, case)
+        bot.delete_message(chat_id=call.message.chat.id, message_id=call.message.message_id)
+        bot.send_message(call.message.chat.id, '✅ - Успешно добавили дроп для '+str(bot_name))
 
 @bot.message_handler(regexp='Добавить дроп')
 def handle(msg):
@@ -38,9 +40,14 @@ def handle(msg):
 def handle(msg):
     list_bots = get_list_bots(msg.from_user.id)
     bots = ''
+    all_sum = 0
     for bot_name in list_bots:
-        bots = bots + '\n🔸 '+ str(bot_name)+ ': '+' кейсов, на сумму: '+' рублей'
-    text = 'Список Ваших ботов: \n'+ str(bots)+'\n\nСтатистика на '+'_ число'
+        cases = get_bot_cases(bot_name)
+        summ = get_summary(cases)
+        count_cases = len(cases)-1
+        bots = bots + '\n🔸 '+ str(bot_name)+ ': '+str(count_cases)+' кейсов, на сумму: '+str(summ)+' рублей'
+        all_sum += int(summ)
+    text = 'Список Ваших ботов: \n'+ str(bots)+'\n\nВсего заработано: '+str(all_sum)+'\nСтатистика на '+'_ число'
     bot.send_message(msg.from_user.id, str(text))
 
 @bot.message_handler(commands=['start', 'help'])

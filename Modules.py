@@ -21,6 +21,49 @@ def add_casetobot(message):
     kb.add(telebot.types.InlineKeyboardButton(text='Revolution Case', callback_data='Revolution_Case'+'|'+str(bot_name)))
     return kb
 
+def get_bot_cases(bot_name):
+    cases = []
+    try:
+        conn = sqlite3.connect('DB/main.db')
+        cursor = conn.cursor()
+        cursor.execute("SELECT cases FROM bots WHERE bot_name LIKE '" + str(bot_name) + "'")
+        results = cursor.fetchall()
+        for row in results:
+            try:
+                cases = row[0]
+            except:
+                bots = bot_name
+        conn.close()
+        cases_str = str(cases)
+        cases = cases_str.split(',')
+    except:
+        print('Не удалось получить кейсы по пользователю')
+    return cases
+
+def get_case_cost(case):
+    case_cost = 0
+    try:
+        conn = sqlite3.connect('DB/main.db')
+        cursor = conn.cursor()
+        case = case[1:]
+        print('CaseName: '+str(case))
+        cursor.execute("SELECT case_cost FROM cases WHERE case_name LIKE '" + str(case) + "'")
+        results = cursor.fetchall()
+        for row in results:
+            try:
+                case_cost = int(row[0])
+            except:
+                print('error')
+    except:
+        case_cost = 0
+    return case_cost
+
+def get_summary(cases):
+    summ = 0
+    for case in cases:
+        cost = get_case_cost(case)
+        summ+=cost
+    return summ
 def add_casedrop(bot_name, case):
     try:
         conn = sqlite3.connect('DB/main.db')
